@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Map from './components/Map'
+import TestBackend from './components/TestBackend'
 import './App.css'
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
     <>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
         <Map />
+        <TestBackend />
       </div>
     </>
   )
