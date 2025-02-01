@@ -1,0 +1,1 @@
+month_of_year,week_of_year,product_category,discount_applied
