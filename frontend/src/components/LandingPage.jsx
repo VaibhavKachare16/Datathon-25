@@ -26,23 +26,31 @@ const LandingPage = () => {
     avgPurchaseValue: 100
   });
 
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="custom-tooltip">
+          <p className="label">{`${label}`}</p>
+          {payload.map((entry, index) => (
+            <p key={index} style={{ color: entry.color }}>
+              {`${entry.name}: ${entry.value}`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   const RADIAN = Math.PI / 180;
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, value, name }) => {
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    
+
     return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="#fff"
-        filter="url(#shadow)"
-        textAnchor={x > cx ? 'start' : 'end'} 
-        dominantBaseline="central"
-        style={{ fontSize: '15px', fontWeight: '500' }}
-      >
-        {`${name} ${(percent * 100).toFixed(0)}%`}
+      <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+        {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
   };
