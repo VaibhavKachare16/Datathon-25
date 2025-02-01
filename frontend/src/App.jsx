@@ -1,17 +1,17 @@
-import { useState } from 'react'
-import Map from './components/Map'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from './components/LandingPage';
+import Map from './components/Map';
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-        <Map />
-      </div>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/map" element={<Map />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
