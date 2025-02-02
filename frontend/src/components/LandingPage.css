@@ -206,4 +206,56 @@
 
 .recharts-legend-item:hover {
   transform: translateX(5px);
+}
+
+.chart-section {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  margin: 1.5rem 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.chart-section h3 {
+  color: #1a237e;
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #1a237e;
+  font-size: 1.1rem;
+}
+
+.error-message {
+  color: #d32f2f;
+  text-align: center;
+  padding: 20px;
+  font-size: 1.1rem;
+}
+
+/* Enhanced chart styles */
+.recharts-default-legend {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px !important;
+}
+
+.recharts-legend-item-text {
+  color: #1a237e !important;
+  font-weight: 500 !important;
+}
+
+.recharts-cartesian-axis-line {
+  filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.1));
+}
+
+.recharts-cartesian-grid-horizontal line {
+  stroke: rgba(26, 35, 126, 0.1);
 } 
