@@ -5,7 +5,7 @@ from scipy.spatial import ConvexHull
 import traceback
 import pandas as pd
 
-from app import feature_names, sales_model, sales_encoders, sales_scaler
+from app import feature_names, sales_model, sales_encoders, sales_scaler, product_recommendation_model, user_product_interaction_data, user_product_interaction_df
 
 views = Blueprint('views', __name__)
 
@@ -88,71 +88,89 @@ def predict_sales():
 
     return jsonify({'product_category': product_category, 'sales_predictions_2022': sales_predictions_2022})
 
-# def get_category_based_offers(product_info, user_total_spend=0):
-#     category = product_info["product_category"]
-#     price = product_info["price"]
+def get_category_based_offers(product_info, user_total_spend=0):
+    category = product_info["product_category"]
+    price = product_info["price"]
     
-#     available_offers = category_offers[category]
+    available_offers = category_offers[category]
     
-#     applicable_offers = [
-#         offer for offer in available_offers
-#         if price >= offer["min_purchase"]
-#     ]
+    applicable_offers = [
+        offer for offer in available_offers
+        if price >= offer["min_purchase"]
+    ]
     
-#     if user_total_spend > 1000:
-#         applicable_offers.append({
-#             "discount": "Extra 5% off",
-#             "description": "VIP customer bonus discount",
-#             "min_purchase": 0
-#         })
+    if user_total_spend > 1000:
+        applicable_offers.append({
+            "discount": "Extra 5% off",
+            "description": "VIP customer bonus discount",
+            "min_purchase": 0
+        })
     
-#     return applicable_offers
+    return applicable_offers
 
-# def recommend_products_with_offers(user_id, model, dataset, df, n=5):
-#     mappings = dataset.mapping()
-#     user_mapping = mappings[0]
-#     item_mapping = mappings[2]
+def recommend_products_with_offers(user_id, model, dataset, df, n=5):
+    mappings = dataset.mapping()
+    user_mapping = mappings[0]
+    item_mapping = mappings[2]
     
-#     if user_id not in user_mapping:
-#         return []
+    if user_id not in user_mapping:
+        return []
     
-#     user_purchases = df[
-#         (df["user_id"] == user_id) & 
-#         (df["interaction"] == 1)
-#     ]
-#     user_total_spend = user_purchases["price"].sum()
+    user_purchases = df[
+        (df["user_id"] == user_id) & 
+        (df["interaction"] == 1)
+    ]
+    user_total_spend = user_purchases["price"].sum()
     
-#     item_ids = list(item_mapping.keys())
-#     user_index = user_mapping[user_id]
-#     scores = model.predict(user_index, np.arange(len(item_ids)))
-#     top_items = np.argsort(-scores)[:n]
+    item_ids = list(item_mapping.keys())
+    user_index = user_mapping[user_id]
+    scores = model.predict(user_index, np.arange(len(item_ids)))
+    top_items = np.argsort(-scores)[:n]
     
-#     recommendations = []
-#     for item_index in top_items:
-#         product_id = item_ids[item_index]
-#         product_info = df[df["product_id"] == product_id].iloc[0].to_dict()
+    recommendations = []
+    for item_index in top_items:
+        product_id = item_ids[item_index]
+        product_info = df[df["product_id"] == product_id].iloc[0].to_dict()
         
-#         offers = get_category_based_offers(product_info, user_total_spend)
+        offers = get_category_based_offers(product_info, user_total_spend)
         
-#         recommendations.append({
-#             "product_id": product_id,
-#             "category": product_info["product_category"],
-#             "price": product_info["price"],
-#             "offers": offers
-#         })
+        recommendations.append({
+            "product_id": product_id,
+            "category": product_info["product_category"],
+            "price": product_info["price"],
+            "offers": offers
+        })
     
-#     return recommendations
+    return recommendations
 
-# @views.route('/recommend', methods=['GET'])
-# def recommend():
-#     user_id = int(request.args.get('user_id'))
-#     num_recommendations = int(request.args.get('n', 5))
-#     recommendations = recommend_products_with_offers(user_id, model, dataset, df, num_recommendations)
-    
-#     if not recommendations:
-#         return jsonify({"error": "User not found"}), 404
-    
-#     return jsonify(recommendations)
+@views.route('/recommend', methods=['GET'])
+def recommend():
+    user_id = int(request.args.get('user_id'))
+    num_recommendations = int(request.args.get('n', 5))
+    recommendations = recommend_products_with_offers(
+        user_id, 
+        product_recommendation_model, 
+        user_product_interaction_data, 
+        user_product_interaction_df, 
+        num_recommendations
+    )
+
+    if not recommendations:
+        return jsonify({"error": "User not found"}), 404
+
+    # Convert all NumPy types to native Python types
+    for rec in recommendations:
+        rec["product_id"] = int(rec["product_id"])
+        rec["price"] = float(rec["price"])
+        rec["offers"] = [
+            {key: (int(value) if isinstance(value, np.integer) else 
+                   float(value) if isinstance(value, np.floating) else 
+                   value) for key, value in offer.items()}
+            for offer in rec["offers"]
+        ]
+
+    return jsonify(recommendations)
+
 
 
 def create_sample_data(n_samples=100):
